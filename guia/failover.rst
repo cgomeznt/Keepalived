@@ -1,15 +1,15 @@
 Failover con Keepalived (Muy utilizado, unicamente como failover)
 =================================================================
 
-Vamos a simular un sistema disponible el 99,99…% del tiempo con Keepalived, de la forma más basica y simple.
+Vamos a simular un sistema disponible el 99,99…% del tiempo con Keepalived, de la forma más básica y simple.
 
 Para esto se suele configurar lo que se denomina un "sistema redundante", es decir dos o más sistemas configurados de forma que uno de ellos sea el que está en funcionamiento y en el caso en que deje de funcionar por cualquier motivo, se active otro de los sistemas que hasta ese momento estaba "en espera" o "inactivo" tan rápidamente como sea posible. Mediante este sistema, incluso en el peor de los casos (la rotura de un disco duro, un desbordamiento de memoria que mate un proceso vital, o incluso que alguien le pegue una patada al cable) puede seguir funcionando gracias al siguiente equipo hasta entonces "dormido".
 
 .. figure:: ../images/keepalive.png
 
 Para conocer más configuraciones:
-* `Keepalived UserGuide <http://www.keepalived.org/pdf/UserGuide.pdf/>`_
-* `Keepalived LVS-NAT-Keepalived-HOWTO <http://www.keepalived.org/LVS-NAT-Keepalived-HOWTO.html>`_
+- `Keepalived UserGuide <http://www.keepalived.org/pdf/UserGuide.pdf/>`_
+- `Keepalived LVS-NAT-Keepalived-HOWTO <http://www.keepalived.org/LVS-NAT-Keepalived-HOWTO.html>`_
 
 
 Como estará configurado el laboratorio
@@ -100,7 +100,7 @@ Ahora en server3 creamos el keepalived.conf::
 	}
 
 
-El archivo de configuración "/etc/keepalived/keepalived.conf" es igual en todos los servidores exepto por la linea priority, especifica la prioridad de la instancia en el router, es decir, cual de los servidores tendra la carga de trabajo cada vez que exista un failover.
+El archivo de configuración "/etc/keepalived/keepalived.conf" es igual en todos los servidores excepto por la linea priority, especifica la prioridad de la instancia en el router, es decir, cual de los servidores tendrá la carga de trabajo cada vez que exista un failover.
 
 En todos los servidores iniciamos el servicio de keepalived.::
 
@@ -113,9 +113,7 @@ Ya esta listo ahora, solo resta hacer pruebas.
 Realizar pruebas de failover
 ++++++++++++++++++++++++++++
 
-Lo primero es siempre consultar el log en cada servidor, por lo que recomiento montar un ``tail -f /var/log/syslog``  
-en cada servidor y luego detener el servico 
- ``/etc/init.d/keepalived stop`` para luego iniciarlo el servicio nuevamente  ``/etc/init.d/keepalived start`` e ir viendo lo que se registra en los logs de cada servidor
+Lo primero es siempre consultar el log en cada servidor, por lo que recomiendo montar un ``tail -f /var/log/syslog`` en cada servidor y luego detener el servicio  ``/etc/init.d/keepalived stop`` para luego iniciarlo el servicio nuevamente  ``/etc/init.d/keepalived start`` e ir viendo lo que se registra en los logs de cada servidor
 
 En cada uno de los servidores y de forma aleatoria ejecute::
 
@@ -126,9 +124,9 @@ Vea la salida en el syslog y vaya analizando::
 	# tail -22 /var/log/syslog
 
 
-Desde su HOST tambien puede ir haciendo ping para registrar la arp y ver como la IPV va cambiando entre las mac address de los servidores.
+Desde su HOST también puede ir haciendo ping para registrar la arp y ver como la IPV va cambiando entre las mac address de los servidores.
 
-Con todos los servidores arriba y tambien con el keepalived. en su HOST ejecute::
+Con todos los servidores arriba y también con el keepalived. en su HOST ejecute::
 
 	# for i in {1..3} ; do ping -c 1 192.168.1.2$i ; done
 		PING 192.168.1.21 (192.168.1.21) 56(84) bytes of data.
@@ -186,7 +184,7 @@ Detenemos el servicio de keepalived en server2 y hacemos ping a la IPV 192.168.2
 
 Vemos como la IPV va cambiando su mac address lo que evidencia que si se esta haciendo el failover. Inicie keepalived en todos los servidores y vea como la prioridad es tal como se configuro en "/etc/keepalived/keepalived.conf" 
 
-Tambien puede colocar el ``tcpdump`` en server1, server2 y server3::
+También puede colocar el ``tcpdump`` en server1, server2 y server3::
 
 	# tcpdump -i eth0 host 192.168.1.20 -vvv
 
@@ -197,5 +195,5 @@ Luego desde el HOST hacer ``ping`` y ver los resultados en el ``tcpdump``.::
 Listo...!!! ya tenemos un verdadero failover, ahora se queda a la imaginación.
 
 Para mas configuraciones:
-`Keepalived UserGuide <http://www.keepalived.org/pdf/UserGuide.pdf/>`_
-`Keepalived LVS-NAT-Keepalived-HOWTO <http://www.keepalived.org/LVS-NAT-Keepalived-HOWTO.html>`_
+- `Keepalived UserGuide <http://www.keepalived.org/pdf/UserGuide.pdf/>`_
+- `Keepalived LVS-NAT-Keepalived-HOWTO <http://www.keepalived.org/LVS-NAT-Keepalived-HOWTO.html>`_
