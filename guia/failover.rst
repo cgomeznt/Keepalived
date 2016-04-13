@@ -218,7 +218,7 @@ El script ``my-script.sh`` puede tener la función para alguna de estas ideas:
 - No hay espacio en disco.
 - etc...etc.
 
-Para que el vrrp_instance interprete que estamos haciendo este chequeo de script se debe introducir el track_script. Cuando track_script devuelve otro código de 0 dos veces, la instancia de VRRP cambiará el estado a FALLO.
+Para que el vrrp_instance interprete que estamos haciendo este chequeo de script se debe introducir el track_script. Cuando track_script devuelve otro código de 0 dos veces, la instancia de VRRP cambiará el estado a FALLO.::
 
 	vrrp_instance MY-FAILOVER {
 		state MASTER
