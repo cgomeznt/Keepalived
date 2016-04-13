@@ -67,7 +67,7 @@ Creamos el keepalived.conf en server2::
 
 	vrrp_instance MY-FAILOVER {
 		state MASTER
-		interface eth0:0
+		interface eth0
 		virtual_router_id 21
 		priority 120
 		advert_int 1
@@ -192,7 +192,189 @@ Luego desde el HOST hacer ``ping`` y ver los resultados en el ``tcpdump``.::
 
 	# for i in {1..3} ; do ping -c 1 192.168.1.2$i ; done
 
-Listo...!!! ya tenemos un verdadero failover, ahora se queda a la imaginación.
+Listo...!!! ya tenemos un failover muy basico pero funcional.
+
+Agregar servicios para hacer failover
++++++++++++++++++++++++++++++++++++++
+
+Anteriormente solo configuramos keepalived para que hiciera failover si encontraba una falla en el adaptador de red o en el servicio de keepalived. Ahora vamos agregar en la configuración de keepalived chequeo de servicios como (ssh, apache, haproxy, etc), también vamos agregar chequeo de puertos y con lo antes dicho podemos armar un failover dependiendo de un servio o de un puerto. Para eso vamos a utilizar estos parámetros en el archivo de configuración.
+- Check Script 
+- Notify Script
+
+**Check Script**, hace una verificación de un script. Este script debe retornar (0) para identificar que todo está bien, si el script retorna (1) o cualquier valor distinto de (0) algo salió mal. Este valor es utilizado por Keepalived para tomar medidas. La estructura seria así::
+
+	vrrp_script chequea_script {
+	  script       "/usr/local/bin/my-script.sh"
+	  interval 2   # Cada 2 segundos chequea
+	  fall 2       # require 2 fallas para hacer el failover
+	  rise 2       # Con 2 valores exitosos se pone como operativo
+	}
+
+El script ``my-script.sh`` puede tener la función para alguna de estas ideas:
+- Para identificar si un servicio esta corriendo.
+- Alguna interfaz remota esta arriba.
+- Algún servicio remoto esta arriba
+- Responde a ping alguna IP, ejemplo  8.8.8.8
+- No hay espacio en disco.
+- etc...etc.
+
+Para que el vrrp_instance interprete que estamos haciendo este chequeo de script se debe introducir el track_script. Cuando track_script devuelve otro código de 0 dos veces, la instancia de VRRP cambiará el estado a FALLO.
+
+	vrrp_instance MY-FAILOVER {
+		state MASTER
+		interface eth0
+		virtual_router_id 21
+		priority 120
+		advert_int 1
+		authentication {
+		    auth_type PASS
+		    auth_pass Venezuela21
+		}
+		virtual_ipaddress {
+		    192.168.1.20
+		}
+		track_script {
+			chequea_script
+		}
+	}
+
+Es muy común utilizar ``killall -0 servicio`` para retornar si un servicio esta corriendo, vea estos ejemplos::
+
+	vrrp_script chequea_haproxy {
+	  script       "killall -0 haproxy"
+	  interval 2 
+	  fall 2
+	  rise 2 
+	}
+
+	vrrp_script chequea_http {
+	  script       "killall -0 apache2"
+	  interval 2 
+	  fall 2
+	  rise 2 
+	}
+
+	vrrp_script chequea_smtp {
+	  script       "killall -0 sendmail"
+	  interval 2 
+	  fall 2
+	  rise 2 
+	}
+
+También con vrrp_script podemos hacer chequeo de los puertos de esta forma::
+
+	vrrp_script chequea_http_port/80 {
+	  script "</dev/tcp/127.0.0.1/443"
+	  interval 2 
+	  fall 2
+	  rise 2 
+	}
+
+	vrrp_script chequea_https_port {
+	  script "</dev/tcp/127.0.0.1/443"
+	  interval 2 
+	  fall 2
+	  rise 2 
+	}
+
+	vrrp_script chequea_smtp_port {
+	  script "</dev/tcp/127.0.0.1/25"
+	  interval 2 
+	  fall 2
+	  rise 2 
+	}
+
+**Notify Script**, Un script de notificar se puede utilizar para realizar otras acciones dependiendo del estado de VRRP, se debe colocar al final del bloque de la instancia.::
+
+	vrrp_instance MY-FAILOVER {
+	 [...]
+	 notify /usr/local/bin/my-notify.sh
+	}
+
+El script es llamado después de cualquier cambio de estado en el VRRP, estos son los parámetros::
+
+- $1 = "GROUPO" o "INSTANCIA"
+- $2 = nombre del grupo o de la instancia.
+- $3 = estados ("MASTER", "BACKUP", "FAULT")
+
+Un ejemplo del script "my-notify.sh"::
+
+	#!/bin/bash
+
+	TYPE=$1
+	NAME=$2
+	STATE=$3
+
+	case $STATE in
+		    "MASTER") /usr/bin/logger "Entro en MASTER"
+		              exit 0
+		              ;;
+		    "BACKUP") /usr/bin/logger "Entro en BACKUP"
+		              exit 0
+		              ;;
+		    "FAULT")  /usr/bin/logger "Entro en FAULT"
+		              exit 0
+		              ;;
+		    *)        /usr/bin/logger "Estado no identificado"
+		              exit 1
+		              ;;
+	esac
+
+No olvide darle el permiso de ejecución::
+
+# chmod +x /usr/local/bin/my-notify.sh
+
+Con **Notify Script**, podemos lograr o administrar un comportamiento que nosotros necesitemos al momento que la VRRP cambie de estado.
+
+Si usted quiere el servidor puede entrar en estado FAULT o hacer failover, si uno o más interfaz de red estan abajo. Para eso se utiliza track_interface, ejemplo::
+
+  track_interface {
+    eth0
+    eth1
+  }
+
+Dejamos aqui un ejemplo del archivo de configuración ``/etc/keepalived/keepalived.conf`` con todo lo antes dicho, recuerde cambiar la prioridad dependiendo del servidor. En cada uno de los servidores se le instalo ``apache2`` y se creo un script HTML en donde tenga el nombre de cada servidor para identificar por medio del navegado cual servidor responde::
+
+	# apt-get install apache2 -y
+
+	# vi /var/www/html/test.html
+		<html>
+		<body>
+		<h3>Servidor SERVER1</h3>
+		</body>
+		</html>
+
+	# vi /etc/keepalived/keepalived.conf
+	vrrp_script chequea_script {
+	  script       "killall -0 apache2"
+	  interval 2   # Cada 2 segundos chequea
+	  fall 2       # require 2 fallas para hacer el failover
+	  rise 2       # Con 2 valores exitosos se pone como operativo
+	}
+
+	vrrp_instance MY-FAILOVER {
+		state MASTER
+		interface eth0
+		virtual_router_id 21
+		priority 150
+		advert_int 1
+		authentication {
+		    auth_type PASS
+		    auth_pass Venezuela21
+		}
+		virtual_ipaddress {
+		    192.168.1.20
+		}
+		track_script {
+			chequea_script
+		}	
+		notify /usr/local/bin/my-notify.sh
+	}
+
+
+Ya saben como hacer las pruebas.
+
+Bueno, felicitaciones ...!!!
 
 Para mas configuraciones:
 - `Keepalived UserGuide <http://www.keepalived.org/pdf/UserGuide.pdf/>`_
