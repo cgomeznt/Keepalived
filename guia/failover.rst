@@ -368,13 +368,18 @@ Dejamos aqui un ejemplo del archivo de configuración ``/etc/keepalived/keepaliv
 		track_script {
 			chequea_script
 		}	
+		track_interface {
+		  eth1
+		}
 		notify /usr/local/bin/my-notify.sh
 	}
 
 
-Ya saben como hacer las pruebas.
+Ya saben como hacer las pruebas. el script my-notify.sh escribe en syslog.
 
 Bueno, felicitaciones ...!!!
+
+Más información, consulte `Keepalived <http://www.keepalived.org/>`_, la documentación /usr/share/doc/keepalived/ y el man de  keepalived (8) y keepalived.conf (5).
 
 Para mas configuraciones:
 - `Keepalived UserGuide <http://www.keepalived.org/pdf/UserGuide.pdf/>`_
