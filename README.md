@@ -11,4 +11,5 @@ Aqui vamos hacer dos laboratorios:
 - [Failover con Keepalived (Muy utilizado, unicamente como failover)](guia/failover.rst)
 - [Balanceador de Carga con Keepalived](guia/balance.rst)
 
-Más información, consulte `Keepalived <http://www.keepalived.org/>`_, la documentación /usr/share/doc/keepalived/ y el man de  keepalived (8) y keepalived.conf (5).
+
+Más información, consulte [Keepalived](http://http://www.keepalived.org// "http://www.http://www.keepalived.org/"), la documentación /usr/share/doc/keepalived/ y el man de  keepalived (8) y keepalived.conf (5).

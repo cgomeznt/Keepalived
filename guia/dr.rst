@@ -7,7 +7,7 @@ Si se fijan en `Failover con Keepalived (Muy utilizado, unicamente como failover
 
 .. figure:: ../images/dr.png
 
-Aqui se omiten pasos que estan publicados en `Failover con Keepalived (Muy utilizado, unicamente como failover) <failover.rst>`_ debe enterder que primero configuramos la capa del failover y luego la de balanceo.
+Aquí se omiten pasos que estan publicados en `Failover con Keepalived (Muy utilizado, unicamente como failover) <failover.rst>`_ debe entender que primero configuramos la capa del failover y luego la de balanceo.
 
 Como estará configurado el laboratorio
 +++++++++++++++++++++++++++++++++++++++

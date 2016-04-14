@@ -3,11 +3,11 @@ Balanceador de Carga en modo NAT
 
 En el siguiente ejemplo se utiliza Keepalived en modo NAT para implementar un **failover** y **balanceo de carga** en dos servidores. Un servidor actúa como MASTER, el otro actúa como BACKUP, el servidor MASTER tiene una prioridad más alta que el BACKUP. Cada uno de los servidores del balanceador con Keepalived tiene dos interfaces de red, donde una de la interfaz (eth0) está conectada hacia una red externa (192.168.1.0/24) y la otra interfaz (eth1) está conectado a una red interna (10.0.0.0/24) en donde se encuentran los tres servidores web.
 
-Si se fijan en `Failover con Keepalived (Muy utilizado, unicamente como failover) <failover.rst>`_ es igual a lo que implementamos aqui, pero en este caso solo le vamos asociar el **virtual server** a la IP Virtual del vrrp externo, para que ejecute el balanceo de carga.
+Si se fijan en `Failover con Keepalived (Muy utilizado, unicamente como failover) <failover.rst>`_ es igual a lo que implementamos aquí, pero en este caso solo le vamos asociar el **virtual server** a la IP Virtual del vrrp externo, para que ejecute el balanceo de carga.
 
 .. figure:: ../images/nat.png
 
-Aqui se omiten pasos que estan publicados en `Failover con Keepalived (Muy utilizado, unicamente como failover) <failover.rst>`_ debe enterder que primero configuramos la capa del failover y luego la de balanceo.
+Aquí se omiten pasos que estan publicados en `Failover con Keepalived (Muy utilizado, unicamente como failover) <failover.rst>`_ debe entender que primero configuramos la capa del failover y luego la de balanceo.
 
 Como estará configurado el laboratorio
 +++++++++++++++++++++++++++++++++++++++
@@ -35,7 +35,7 @@ La siguiente configuración en ``/etc/keepalived/keepalived.conf`` en el servido
 	}
 
 	vrrp_sync_group VRRP1 {
-	#   Groupo de VRRP instancias para hacer siempre el failover juntos
+	#   Grupo de VRRP instancias para hacer siempre el failover juntos
 		group {
 		    externa
 		    interna
@@ -121,7 +121,7 @@ La siguiente configuración en ``/etc/keepalived/keepalived.conf`` en el servido
 	}
 
 	vrrp_sync_group VRRP1 {
-	#   Groupo de VRRP instancias para hacer siempre el failover juntos, esto en el Keepalived con NAT no lo utilizamos
+	#   Grupo de VRRP instancias para hacer siempre el failover juntos, esto en el Keepalived con NAT no lo utilizamos
 		group {
 		    externa
 		    interna
@@ -168,7 +168,7 @@ La siguiente configuración en ``/etc/keepalived/keepalived.conf`` en el servido
 		lb_algo rr
 	#   Usa NAT para ocultar los servidores backend, los web servers
 		lb_kind NAT
-	#   Aplica time out a sesiones persistentes despues de 2 horas.
+	#   Aplica time out a sesiones persistentes después de 2 horas.
 		persistence_timeout 7200
 
 		real_server 10.0.0.50 80 {
