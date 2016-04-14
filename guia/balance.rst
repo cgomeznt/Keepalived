@@ -5,7 +5,9 @@ Balanceador de Carga con Keepalived
 
 
 **Dos formas de hacer balanceador de carga con Keepalive**
+
 * `Balanceador de Carga en modo NAT. <nat.rst>`_
+
 * `Balanceador de Carga en modo DR. <dr.rst>`_
 
 
